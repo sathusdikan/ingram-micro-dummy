@@ -1,17 +1,16 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Prisma schema for Shopify + Supabase integration
+// Includes multi-schema support for Supabase auth
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"] // required for multi-schema
 }
 
-// Note that some adapters may set a maximum length for the String type by default, please ensure your strings are long
-// enough when changing adapters.
-// See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+  schemas   = ["public", "auth"] // include auth because FK references auth.users
 }
 
 model Session {
@@ -54,10 +53,10 @@ model IngramCredential {
 model CarrierConfiguration {
   id           String   @id @default(cuid())
   shopDomain   String
-  carrierCode  String   // e.g., "UG", "RG", "U3"
-  carrierName  String   // e.g., "UPS GROUND", "FEDEX GROUND"
-  carrierMode  String   // e.g., "SML", "AIR", "LTL"
-  displayName  String?  // Custom name for checkout (optional)
+  carrierCode  String
+  carrierName  String
+  carrierMode  String
+  displayName  String?
   enabled      Boolean  @default(true)
   sortOrder    Int      @default(0)
   createdAt    DateTime @default(now())
@@ -71,31 +70,26 @@ model RateRequestLog {
   id              String   @id @default(cuid())
   shopDomain      String
   correlationId   String   @unique
-  requestType     String   // "carrier_service" or "cart_estimate"
+  requestType     String
 
-  // Request info
   cartItemCount   Int
-  cartSkus        String   // JSON array of SKUs
-  ingramPartNums  String?  // JSON array of mapped part numbers
+  cartSkus        String
+  ingramPartNums  String?
   shipToCity      String?
   shipToState     String?
   shipToZip       String?
   shipToCountry   String?
 
-  // Response info
-  status          String   // "success", "error", "no_rates", "no_mapping", "api_error"
+  status          String
   distributionCount Int?
   ratesReturned   Int?
-  ratesData       String?  // JSON of rates returned (truncated)
+  ratesData       String?
 
-  // Error info
   errorMessage    String?
-  errorDetails    String?  // JSON of error details
+  errorDetails    String?
 
-  // Ingram API info
-  ingramRawResponse String? // JSON of raw Ingram response (truncated for storage)
+  ingramRawResponse String?
 
-  // Timing
   durationMs      Int?
   createdAt       DateTime @default(now())
 
@@ -119,7 +113,7 @@ model ProductMapping {
 model ProductSyncJob {
   id         String   @id @default(cuid())
   shopDomain String
-  status     String   // queued, running, success, failed
+  status     String
   processed  Int      @default(0)
   total      Int      @default(0)
   error      String?
@@ -135,7 +129,7 @@ model ProductSyncJob {
 model FallbackRateSettings {
   shopDomain  String   @id
   enabled     Boolean  @default(true)
-  price       Float    @default(999.00)  // Price in dollars
+  price       Float    @default(999.00)
   title       String   @default("Shipping Unavailable")
   description String   @default("Please contact support before placing this order")
   createdAt   DateTime @default(now())
