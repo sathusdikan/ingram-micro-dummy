@@ -1,6 +1,6 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "6ad2aabe6a9c5191075598b83cd120cf"
+client_id = "451276576574c92822f00508e5780330"
 name = "ingram-micro-dummy"
 application_url = "https://ingram-micro-dummy.vercel.app"
 embedded = true
